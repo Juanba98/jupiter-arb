@@ -4,7 +4,7 @@ import fetch from 'isomorphic-fetch';
 import bs58 from 'bs58';
 import {Jupiter, RouteInfo, TOKEN_LIST_URL} from '@jup-ag/core';
 
-const RPC_ENDPOINT = 'https://solana-api.projectserum.com';
+const RPC_ENDPOINT = 'https://ssc-dao.genesysgo.net';
 
 // Interface
 interface Token {
@@ -126,10 +126,13 @@ async function tryToExecuteSwap(
   jupiter: Jupiter,
 ) {
   const bestRoute = await getBestRouteToSelf(amount, token, jupiter);
-
+  //console.log("amount",amount)
+  //console.log("token",token)
+  //console.log("jupiter",jupiter)
   const bestOutAmountWithSlippage = bestRoute?.outAmountWithSlippage ?? 0;
   const inputUSDCWithDecimals = amount * 10 ** 6;
   console.log('bestRoute', bestRoute);
+  //Safeguard the bot form makin transactions that could lose money
   if (bestOutAmountWithSlippage > inputUSDCWithDecimals) {
     await executeSwap({jupiter, routeInfo: bestRoute!});
   }
@@ -141,12 +144,18 @@ const main = async () => {
     await fetch(TOKEN_LIST_URL['mainnet-beta'])
   ).json();
 
-  //  Load Jupiter
+
+ // tokens.forEach(element => {
+ //   
+ //   console.log(element)
+ // });
+   //  Load Jupiter
   const jupiter = await Jupiter.load({
     connection,
     cluster: 'mainnet-beta',
     user: kp, // or public key
   });
+ console.log("sad")
 
   const usdcToken = tokens.find((t) => t.address === USDC_MINT)!;
   const amount = 1000; // arbitrary small amount
